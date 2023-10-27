@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 #include "structs.h"
 
@@ -52,15 +53,59 @@ void contextSwitchReport(const Clock& p_clock, const Queue& ready, const Queue& 
     std::cout << "--------------------------------" << std::endl;
 }
 
+void schedulerReport(const Clock& p_clock, std::vector<ProcessNode> process_complete) {
 
+    float avg_tw = 0.0, avg_ttr= 0.0, avg_tr = 0.0;
+    /*
+        (6) Results printed at the end of each simulation
+            **This information should be displayed at the end of each simulation**
+            1. Total time needed to complete all 8 processes.
+            2. CPU utilization - [%] (U).
+            3. Waiting times for each process and the average waiting time for all processes (Tw)
+            4. Turnaround time for each process and the average turnaround time.(Ttr)
+            5. Response time for each process and the average response time (Tr).
+    */
+
+   for(ProcessNode& completed : process_complete) {
+        avg_tw += completed.tw;
+        avg_ttr += completed.ttr;
+        avg_tr += completed.tr;
+   }
+
+   avg_tw /= 8.0;
+   avg_ttr /= 8.0;
+   avg_tr /= 8.0;
+
+    const int columnWidth = 10;
+    std::cout << "---------------------------------" << std::endl;
+    // Print the table header
+    std::cout << std::setw(columnWidth) << std::left << "Process"
+                << std::setw(columnWidth) << std::left << "Tw"
+                << std::setw(columnWidth) << std::left << "Ttw" 
+                << std::setw(columnWidth) << std::left << "Tr" << std::endl;
+
+    std::cout << "---------------------------------" << std::endl;
+
+    // Print the table rows
+    for(ProcessNode& complete_process : process_complete) {
+        std::cout << std::setw(columnWidth) << std::left << complete_process.pid
+                    << std::setw(columnWidth) << std::left << complete_process.tw 
+                    << std::setw(columnWidth) << std::left << complete_process.ttr 
+                    << std::setw(columnWidth) << std::left << complete_process.tr << std::endl;
+    }
+   
+   std::cout << "---------------------------------" << std::endl;
+   std::cout << std::setw(columnWidth) << std::left << "Avg"
+                    << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_tw 
+                    << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_ttr 
+                    << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_tr << std::endl;
+}
 void FCFS(Queue& ready, Queue& io) {
     Clock p_clock;
 
-    unsigned int avg_tw, avg_ttr, avg_tr;
-
     float cpu_util;
 
-    std::vector<int> process_complete;
+    std::vector<ProcessNode> process_complete;
 
     ProcessNode* ready_process = ready.head;
     ProcessNode* io_process  = io.head;
@@ -110,7 +155,7 @@ void FCFS(Queue& ready, Queue& io) {
 
                     std::cout << "tw= " << ready_process->tw << std::endl << "tr= " << ready_process->tr << std::endl << "ttr: " << ready_process->ttr << std::endl << "--------------------------------" << std::endl;
                     
-                    process_complete.push_back(ready_process->pid);
+                    process_complete.push_back(*ready_process);
                     ready.dequeue(); ///remove from ready queue completely
                     ready_process = ready.head; //context switch after process complete
                 
@@ -152,8 +197,7 @@ void FCFS(Queue& ready, Queue& io) {
         }
     }
 
-    for(int& pid : process_complete) {
-        std::cout << pid << " ";
-    }
+    std::cout << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << 0.00 << std::endl; 
+    schedulerReport(p_clock, process_complete);
 }
 

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <iomanip>
 
 #ifndef STRUCTS_H
 #define STRUCTS_H
