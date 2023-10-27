@@ -3,7 +3,7 @@
  
  //constructors
 ProcessNode::ProcessNode() {
-    ready_state = false;
+    running_state = false;
     
     tw = 0, ttr = 0, tr = 0, p_counter = 0, pid = 0;
     
@@ -98,6 +98,11 @@ void Queue::dequeue() {
     if(isEmpty()) {//if queue empty
         std::cout <<std::endl << "Errot: Queue is empty - Cannot dequeue" << std::endl;
         return;
+    } else if(head->next == nullptr) {
+        delete head;
+        head = nullptr;
+        tail = nullptr;
+        count = 0; // Reset count to 0 since the queue is now empty
     } else {
         ProcessNode* temp = head;
         head = head->next;
@@ -132,29 +137,29 @@ void Queue::display() {
     std::cout << std::endl << count << " Processes" << std::endl;
 }
 
-
-
 ProcessNode* Queue::remove(unsigned int pid) {
-    int position;
-    ProcessNode copy;
-    if (isEmpty()) {
-        std::cout << "Error: Queue is empty, cannot remove" << std::endl;
-        return nullptr;
-    } else if (head->pid == pid) {
-            copy = *head;
-            delete head;
-            head = nullptr;
-            count--;
-            return copy.next;
-    } else {
-        ProcessNode* temp = head; //initialize temp for traversal
-        while (temp && temp->pid != pid) { 
-            temp = temp->next;
-        }
-        temp->prev->next = temp->next; //node before temp points to node after temp, ignoring temp
-        copy = *temp;
-        delete temp; //deallocate temp for possible new use
-        count--;
-        return copy.next;
+    ProcessNode* temp = head; // initialize temp for traversal
+
+    while (temp && temp->pid != pid) {
+        temp = temp->next;
     }
+
+    // Check if temp is the head
+    if (temp == head) {
+        head = temp->next;
+        if (head) {
+            head->prev = nullptr;
+        }
+    } else {
+        temp->prev->next = temp->next; // node before temp points to node after temp, ignoring temp
+        if (temp->next) {
+            temp->next->prev = temp->prev;
+        }
+    }
+
+    ProcessNode* nextNode = temp->next; // store the next node before deletion
+    delete temp; // deallocate temp for possible new use
+    count--;
+
+    return nextNode;
 }

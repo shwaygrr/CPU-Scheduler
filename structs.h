@@ -13,7 +13,7 @@ struct ProcessNode {
 
     unsigned int p_counter; //program counter
 
-    bool ready_state; //either ready or in I/O
+    bool running_state; //either ready or in I/O
     
     std::vector<unsigned int> burst_seq; 
 
@@ -62,8 +62,6 @@ class Queue {
         int pidCounter; //counts amount element in queue
         
         void assignPid(ProcessNode* process); //assign process ID based on counter
-
-
 };
 
 #endif
