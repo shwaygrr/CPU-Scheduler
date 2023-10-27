@@ -99,7 +99,12 @@ void schedulerReport(const Clock& p_clock, std::vector<ProcessNode> process_comp
                     << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_tw 
                     << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_ttr 
                     << std::setw(columnWidth-1) << std::fixed << std::setprecision(2) << std::left << avg_tr << std::endl;
+
+    std::cout << "---------------------------------" << std::endl;
+    std::cout << "Total Time to Complete: " << p_clock.time;
 }
+
+
 void FCFS(Queue& ready, Queue& io) {
     Clock p_clock;
 
@@ -148,12 +153,12 @@ void FCFS(Queue& ready, Queue& io) {
                 std::cout << "--------------------------------" << std::endl << "Process " << ready_process->pid << " Burst #" << ready_process->p_counter+1 << " Complete" << std::endl << std::endl;
 
                 if (ready_process->p_counter == ready_process->burst_seq.size()-1) { //if that was final cpu burst
-                    std::cout << "Process " << ready_process->pid <<" Final Burst #" << ready_process->p_counter+1 << std::endl;
+                    std::cout << "Process " << ready_process->pid <<" Complete" << std::endl;
                     
                     ready_process->ttr = p_clock.time; //update turnaround time
                     
 
-                    std::cout << "tw= " << ready_process->tw << std::endl << "tr= " << ready_process->tr << std::endl << "ttr: " << ready_process->ttr << std::endl << "--------------------------------" << std::endl;
+                    //sstd::cout << "tw= " << ready_process->tw << std::endl << "tr= " << ready_process->tr << std::endl << "ttr: " << ready_process->ttr << std::endl << "--------------------------------" << std::endl;
                     
                     process_complete.push_back(*ready_process);
                     ready.dequeue(); ///remove from ready queue completely
@@ -197,7 +202,7 @@ void FCFS(Queue& ready, Queue& io) {
         }
     }
 
-    std::cout << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << 0.00 << std::endl; 
+    std::cout << std::endl << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << 0.00 << std::endl; 
     schedulerReport(p_clock, process_complete);
 }
 
