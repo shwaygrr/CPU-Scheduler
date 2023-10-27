@@ -163,3 +163,15 @@ ProcessNode* Queue::remove(unsigned int pid) {
 
     return nextNode;
 }
+
+void Queue::updateTimes(unsigned int time) {
+    if (head->p_counter == 0 && !head->running_state)  //if first time process running
+        head->tr = time; //set response time
+
+    ProcessNode* temp = head->next;
+
+    while (temp) {
+        temp->tw++;
+        temp = temp->next;
+    }
+}

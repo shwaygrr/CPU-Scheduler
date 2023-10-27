@@ -34,7 +34,7 @@ void FCFS(Queue& ready, Queue& io) {
 
     float cpu_util;
 
-    std::vector<int> completion_order;
+    std::vector<int> process_complete;
 
     ProcessNode* ready_process = ready.head;
     ProcessNode* io_process  = io.head;
@@ -47,14 +47,13 @@ void FCFS(Queue& ready, Queue& io) {
         std::cout << "Current execution time: " << p_clock.time << " Time Units" << std::endl;
         p_clock.paused = true; //reset time
 
+
         if(ready.isEmpty() && !io.isEmpty()) { //if ready empty but io not
             std::cout << "Ready Queue empty, All remaining processes in I/O" << std::endl; 
             p_clock.time++;
             p_clock.paused = false;
         }
-
-        //**at time 520 ready queue becomes empty and exception in below line**
-        //Fix: find way for the time to still run in I/O if ready is emptys
+        
         if(!ready.isEmpty()) {
             
             if(ready_process == nullptr) { //if ready was empty and now not empty anymore
@@ -62,6 +61,8 @@ void FCFS(Queue& ready, Queue& io) {
             }
 
             if (ready_process->burst_seq[(ready_process->p_counter)]) { //if process burst currently running ** != 0 **
+                
+                ready.updateTimes(p_clock.time);
                 
                 ready_process->running_state = true; //update running state boolean
                 
@@ -82,7 +83,7 @@ void FCFS(Queue& ready, Queue& io) {
                     
                     std::cout << "tw= " << ready_process->tw << std::endl << "tr= " << ready_process->tr << std::endl << "ttr: " << ready_process->ttr << std::endl;
                     
-                    completion_order.push_back(ready_process->pid);
+                    process_complete.push_back(ready_process->pid);
                     ready.dequeue(); ///remove from ready queue completely
                     ready_process = ready.head; //context switch after process complete
                 
@@ -122,4 +123,9 @@ void FCFS(Queue& ready, Queue& io) {
             io_process = io.head;
         }
     }
+
+    for(int& pid : process_complete) {
+        std::cout << pid << " ";
+    }
 }
+

@@ -51,7 +51,8 @@ class Queue {
         void display();
 
         void create(const std::vector<std::vector<unsigned int>>); //create queue given vector of processes
-    
+
+        void updateTimes(unsigned int time); //update wait time and response time
     private:
         ProcessNode* getNode(const std::vector<unsigned int> node_data); //create new node
         
