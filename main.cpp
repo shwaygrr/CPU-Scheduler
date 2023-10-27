@@ -5,6 +5,7 @@
 #include "structs.h"
 
 void contextSwitchReport(const Clock& p_timer, const Queue& ready, const Queue& io);
+void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_complete);
 void FCFS(Queue& ready, Queue& io);
 
 int main() {
@@ -25,6 +26,7 @@ int main() {
     ready.create(p_data);
 
     FCFS(ready, io);
+    //SJF(ready, io);
 
     return 0;
 }
@@ -53,7 +55,7 @@ void contextSwitchReport(const Clock& p_clock, const Queue& ready, const Queue& 
     std::cout << "--------------------------------" << std::endl;
 }
 
-void schedulerReport(const Clock& p_clock, std::vector<ProcessNode> process_complete) {
+void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_complete) {
 
     float avg_tw = 0.0, avg_ttr= 0.0, avg_tr = 0.0;
     /*
@@ -112,7 +114,7 @@ void FCFS(Queue& ready, Queue& io) {
 
     std::vector<ProcessNode> process_complete;
 
-    ProcessNode* ready_process = ready.head;
+    ProcessNode* running_process = ready.head;
     ProcessNode* io_process  = io.head;
 
     unsigned int total_cpu_time = 0;
@@ -133,50 +135,50 @@ void FCFS(Queue& ready, Queue& io) {
         
         if(!ready.isEmpty()) {
             
-            if(ready_process == nullptr) { //if ready was empty and now not empty anymore
-                ready_process = ready.head;
+            if(running_process == nullptr) { //if ready was empty and now not empty anymore
+                running_process = ready.head;
             }
 
-            if (ready_process->burst_seq[(ready_process->p_counter)]) { //if process burst currently running ** != 0 **
+            if (running_process->burst_seq[(running_process->p_counter)]) { //if process burst currently running ** != 0 **
                 
                 ready.updateTimes(p_clock.time);
                 
-                ready_process->running_state = true; //update running state boolean
+                running_process->running_state = true; //update running state boolean
                 
-                //std::cout << "Process " << ready_process->pid << " running " << std::endl << "Burst " << ready_process->p_counter+1 << ": " << ready_process->burst_seq[(ready_process->p_counter)] << " time units left" << std::endl << std::endl;
+                //std::cout << "Process " << running_process->pid << " running " << std::endl << "Burst " << running_process->p_counter+1 << ": " << running_process->burst_seq[(running_process->p_counter)] << " time units left" << std::endl << std::endl;
 
                 p_clock.time++; //increment timer
                 total_cpu_time++;
                 p_clock.paused = false; //let I/O know time was changed
-                ready_process->burst_seq[(ready_process->p_counter)]--; //decrement sequence burst
+                running_process->burst_seq[(running_process->p_counter)]--; //decrement sequence burst
 
             } else { //process finish with current cpu burst **time paused, IO will not do anything**
 
-                std::cout << "--------------------------------" << std::endl << "Process " << ready_process->pid << " Burst #" << ready_process->p_counter+1 << " Complete" << std::endl << std::endl;
+                std::cout << "--------------------------------" << std::endl << "Process " << running_process->pid << " Burst #" << running_process->p_counter+1 << " Complete" << std::endl << std::endl;
 
-                if (ready_process->p_counter == ready_process->burst_seq.size()-1) { //if that was final cpu burst
-                    std::cout << "Process " << ready_process->pid <<" Complete" << std::endl;
+                if (running_process->p_counter == running_process->burst_seq.size()-1) { //if that was final cpu burst
+                    std::cout << "Process " << running_process->pid <<" Complete" << std::endl;
                     
-                    ready_process->ttr = p_clock.time; //update turnaround time
+                    running_process->ttr = p_clock.time; //update turnaround time
                     
 
-                    //sstd::cout << "tw= " << ready_process->tw << std::endl << "tr= " << ready_process->tr << std::endl << "ttr: " << ready_process->ttr << std::endl << "--------------------------------" << std::endl;
+                    //sstd::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr: " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
                     
-                    process_complete.push_back(*ready_process);
+                    process_complete.push_back(*running_process);
                     ready.dequeue(); ///remove from ready queue completely
-                    ready_process = ready.head; //context switch after process complete
+                    running_process = ready.head; //context switch after process complete
                 
                 } else { //just normal cpu burst
 
-                    ready_process->p_counter++; //move to next burst in process
-                    ready_process->running_state = false;
-                    io.enqueue(*ready_process); //move head to io queue
+                    running_process->p_counter++; //move to next burst in process
+                    running_process->running_state = false;
+                    io.enqueue(*running_process); //move head to io queue
                     ready.dequeue(); //remove from ready queue
                     if(ready.head != nullptr) {
-                        ready_process = ready.head; //context swtich to next process in ready
+                        running_process = ready.head; //context swtich to next process in ready
                         contextSwitchReport(p_clock, ready, io);
                     } else {
-                        ready_process = nullptr;
+                        running_process = nullptr;
                         continue;
                     } 
                 }
@@ -188,7 +190,7 @@ void FCFS(Queue& ready, Queue& io) {
             io_process = io.head; //set up travesal
             
             while(io_process) { //while still process left
-                io_process->burst_seq[io_process->p_counter]--;
+                io_process->burst_seq[io_process->p_counter]--; //decrement burst
 
                 if(io_process->burst_seq[io_process->p_counter] == 0) { //finished I/O
                     //std::cout << "Process " << io_process->pid << " complete I/O #" << io_process->p_counter << " at time: " << p_clock.time << std::endl;
@@ -208,4 +210,3 @@ void FCFS(Queue& ready, Queue& io) {
     std::cout << std::endl << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
     schedulerReport(p_clock, process_complete);
 }
-
