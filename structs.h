@@ -4,30 +4,36 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-//Proccess Control Block
+//Proccess Control Block double linked list implementation
 
 struct ProcessNode {
-    bool ready_state; //either ready or running
+    ProcessNode();
     
-    unsigned int p_counter; //program counter
-    
-    unsigned int tw, ttr, tr; //stats: wait time, turnaround, and response time
-
     unsigned int pid; // process ID
+
+    unsigned int p_counter; //program counter
+
+    bool ready_state; //either ready or in I/O
+    
+    std::vector<int> burst_seq; 
+
+    unsigned int tw, ttr, tr; //stats: wait time, turnaround, and response time
 
     ProcessNode* prev; //previous node/process
     ProcessNode* next; //next node/process
 };
 
 
-//Queue
+//double linked list Queue
 
 class Queue {
     public:
-        ProcessNode* head, tail; //head and tail of queue
+        Queue();
+        ProcessNode* head; //tail of queue
+        ProcessNode* tail; //head of queue
         unsigned int count; //number of items in queue
 
-        void enqueue(const ProcessNode*); //add new queue to end
+        void enqueue(ProcessNode*); //add new queue to end
         void enqueue(const ProcessNode&); //add existing queue to end
 
         void dequeue(); //remove from head
@@ -49,7 +55,7 @@ class Queue {
         
         int pidCounter; //counts amount element in queue
         
-        void assignPid(const ProcessNode* process); //assign process ID based on counter
+        void assignPid(ProcessNode* process); //assign process ID based on counter
 
 
 };
