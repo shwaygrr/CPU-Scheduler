@@ -115,6 +115,7 @@ void FCFS(Queue& ready, Queue& io) {
     ProcessNode* ready_process = ready.head;
     ProcessNode* io_process  = io.head;
 
+    unsigned int total_cpu_time = 0;
   
     while(!ready.isEmpty() || !io.isEmpty()) { //while either queue running operations
         
@@ -145,6 +146,7 @@ void FCFS(Queue& ready, Queue& io) {
                 //std::cout << "Process " << ready_process->pid << " running " << std::endl << "Burst " << ready_process->p_counter+1 << ": " << ready_process->burst_seq[(ready_process->p_counter)] << " time units left" << std::endl << std::endl;
 
                 p_clock.time++; //increment timer
+                total_cpu_time++;
                 p_clock.paused = false; //let I/O know time was changed
                 ready_process->burst_seq[(ready_process->p_counter)]--; //decrement sequence burst
 
@@ -201,8 +203,9 @@ void FCFS(Queue& ready, Queue& io) {
             io_process = io.head;
         }
     }
+    cpu_util = static_cast<float>(total_cpu_time)/static_cast<float>(p_clock.time); //calculate cpu utilazation
 
-    std::cout << std::endl << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << 0.00 << std::endl; 
+    std::cout << std::endl << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
     schedulerReport(p_clock, process_complete);
 }
 
