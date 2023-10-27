@@ -37,8 +37,8 @@ class Queue {
         void enqueue(const ProcessNode&); //add existing queue to end
 
         void dequeue(); //remove from head
-        void remove(); //remove from any
-        void moveToHead(); //move process to head of queue
+
+        ProcessNode* remove(int pid); //remove from any pid and return the next item in queue **Only for I/O to use**
 
         bool isEmpty(); //true if queue is empty
 

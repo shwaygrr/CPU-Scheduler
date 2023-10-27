@@ -132,3 +132,30 @@ void Queue::display() {
     }
     std::cout << std::endl << count << " Processes" << std::endl;
 }
+
+
+
+ProcessNode* Queue::remove(int pid) {
+    int position;
+    ProcessNode copy;
+    if (isEmpty()) {
+        std::cout << "Error: Queue is empty, cannot remove" << std::endl;
+        return nullptr;
+    } else if (head->pid == pid) {
+            copy = *head;
+            delete head;
+            head = nullptr;
+            count--;
+            return copy.next;
+    } else {
+        ProcessNode* temp = head; //initialize temp for traversal
+        while (temp && temp->pid != pid) { 
+            temp = temp->next;
+        }
+        temp->prev->next = temp->next; //node before temp points to node after temp, ignoring temp
+        copy = *temp;
+        delete temp; //deallocate temp for possible new use
+        count--;
+        return copy.next;
+    }
+}

@@ -23,11 +23,11 @@ int main() {
 
     ready.create(p_data);
 
-    ready.display();
+   // ready.display();
 
-    ready.dequeue();
+    std::cout << ready.remove(3)->pid;
     
-    ready.display();
+     ready.display();
 
     return 0;
 }
