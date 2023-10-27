@@ -38,7 +38,7 @@ ProcessNode* Queue::allocateProcess(const ProcessNode& process) {
     return new_process;
 }
 
-void Queue::pDisplay(std::vector<unsigned int> burst_list) {
+void Queue::pDisplay(std::vector<unsigned int> burst_list)const {
     for (int i = 0; i < burst_list.size(); i++) {
         std::cout << burst_list[i] << " ";
     }
@@ -54,7 +54,7 @@ void Queue::assignPid(ProcessNode* process) {
 
 
 //public functions
-bool Queue::isEmpty() {
+bool Queue::isEmpty()const {
     return !head; //true if head == nullptr
 }
 
@@ -118,23 +118,24 @@ void Queue::create(std::vector<std::vector<unsigned int>> p_data) {
         ProcessNode* new_process = getNode(p_data[i]);
         enqueue(new_process);
     }
-    std::cout << std::endl<< "Queue matrix:" << std::endl;
+    //std::cout << std::endl<< "Queue matrix:" << std::endl;
     //display();
 }
 
-void Queue::display() {
+void Queue::display()const {
     ProcessNode* temp = head; //init traverser
 
     if (isEmpty()) { //if queue empty
         std::cout << "Empty queue";
     } else {
         while(temp) { //while Process exists
-            std::cout << "Process "<< temp->pid << " : ";
-            pDisplay(temp->burst_seq); //display row
+            //std::cout << "Process "<< temp->pid << " : ";
+            //pDisplay(temp->burst_seq); //display row
+            std::cout << "Process " << temp->pid << ": " << temp->burst_seq[temp->p_counter] << " time units left" << std::endl;
             temp = temp->next;
         }
     }
-    std::cout << std::endl << count << " Processes" << std::endl;
+    std::cout << std::endl <<"**" << count << " Processes**" << std::endl;
 }
 
 ProcessNode* Queue::remove(unsigned int pid) {

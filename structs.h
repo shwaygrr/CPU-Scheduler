@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 #ifndef STRUCTS_H
 #define STRUCTS_H
@@ -46,19 +47,20 @@ class Queue {
 
         ProcessNode* remove(unsigned int pid); //remove from any pid and return the next item in queue **Only for I/O to use**
 
-        bool isEmpty(); //true if queue is empty
+        bool isEmpty()const; //true if queue is empty
 
-        void display();
+        void display()const;
 
         void create(const std::vector<std::vector<unsigned int>>); //create queue given vector of processes
 
         void updateTimes(unsigned int time); //update wait time and response time
+
     private:
         ProcessNode* getNode(const std::vector<unsigned int> node_data); //create new node
         
         ProcessNode* allocateProcess(const ProcessNode& new_process); //allocate space for already formed process
         
-        void pDisplay(const std::vector<unsigned int> burst); //display a given process' bursts
+        void pDisplay(const std::vector<unsigned int> burst)const; //display a given process' bursts
         
         int pidCounter; //counts amount element in queue
         
