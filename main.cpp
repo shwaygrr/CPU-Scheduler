@@ -17,17 +17,15 @@ int main() {
         {4, 14, 5, 33, 6, 51, 14, 73, 16, 87, 6}
     };
 
-    Queue ready, io;
+    Clock p_timer;
 
-    ready.display();
+    unsigned int time = 31;
 
-    ready.create(p_data);
+    while(p_timer.time != time) {
+        p_timer.time++;
+    }
 
-   // ready.display();
-
-    std::cout << ready.remove(3)->pid;
-    
-     ready.display();
+    std::cout << p_timer.time << std::endl << time; 
 
     return 0;
 }

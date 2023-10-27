@@ -15,7 +15,7 @@ struct ProcessNode {
 
     bool ready_state; //either ready or in I/O
     
-    std::vector<int> burst_seq; 
+    std::vector<unsigned int> burst_seq; 
 
     unsigned int tw, ttr, tr; //stats: wait time, turnaround, and response time
 
@@ -23,6 +23,12 @@ struct ProcessNode {
     ProcessNode* next; //next node/process
 };
 
+//Scheduler clock
+struct Clock {
+    Clock();
+    unsigned int time;
+    bool paused; 
+};
 
 //double linked list Queue
 
@@ -38,20 +44,20 @@ class Queue {
 
         void dequeue(); //remove from head
 
-        ProcessNode* remove(int pid); //remove from any pid and return the next item in queue **Only for I/O to use**
+        ProcessNode* remove(unsigned int pid); //remove from any pid and return the next item in queue **Only for I/O to use**
 
         bool isEmpty(); //true if queue is empty
 
         void display();
 
-        void create(const std::vector<std::vector<int>>); //create queue given vector of processes
+        void create(const std::vector<std::vector<unsigned int>>); //create queue given vector of processes
     
     private:
-        ProcessNode* getNode(const std::vector<int> node_data); //create new node
+        ProcessNode* getNode(const std::vector<unsigned int> node_data); //create new node
         
         ProcessNode* allocateProcess(const ProcessNode& new_process); //allocate space for already formed process
         
-        void pDisplay(const std::vector<int> burst); //display a given process' bursts
+        void pDisplay(const std::vector<unsigned int> burst); //display a given process' bursts
         
         int pidCounter; //counts amount element in queue
         
@@ -59,4 +65,5 @@ class Queue {
 
 
 };
+
 #endif

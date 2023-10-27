@@ -15,11 +15,10 @@ Queue::Queue() {
     count = 0, pidCounter = 0;
 }
 
-
-
+Clock::Clock(): paused(true), time(0) {}
 
 //privates functions
-ProcessNode* Queue::getNode(const std::vector<int> node_data) {
+ProcessNode* Queue::getNode(const std::vector<unsigned int> node_data) {
     ProcessNode* new_node = new ProcessNode(); //allocate space for new node and point to it
     
     new_node->burst_seq = node_data; //input burst list
@@ -39,7 +38,7 @@ ProcessNode* Queue::allocateProcess(const ProcessNode& process) {
     return new_process;
 }
 
-void Queue::pDisplay(std::vector<int> burst_list) {
+void Queue::pDisplay(std::vector<unsigned int> burst_list) {
     for (int i = 0; i < burst_list.size(); i++) {
         std::cout << burst_list[i] << " ";
     }
@@ -109,7 +108,7 @@ void Queue::dequeue() {
     //display(); //display updated queue
 }
 
-void Queue::create(std::vector<std::vector<int>> p_data) {
+void Queue::create(std::vector<std::vector<unsigned int>> p_data) {
     for(int i = 0; i < p_data.size(); i++) {
         ProcessNode* new_process = getNode(p_data[i]);
         enqueue(new_process);
@@ -135,7 +134,7 @@ void Queue::display() {
 
 
 
-ProcessNode* Queue::remove(int pid) {
+ProcessNode* Queue::remove(unsigned int pid) {
     int position;
     ProcessNode copy;
     if (isEmpty()) {
