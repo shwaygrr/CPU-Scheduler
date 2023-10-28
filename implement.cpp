@@ -165,14 +165,42 @@ ProcessNode* Queue::remove(unsigned int pid) {
     return nextNode;
 }
 
-void Queue::updateTimes(unsigned int time) {
-    if (head->p_counter == 0 && !head->running_state)  //if first time process running
-        head->tr = time; //set response time
+void Queue::updateTimes(unsigned int time, ProcessNode* running_process) {
+    if (running_process->p_counter == 0 && !running_process->running_state)  //if first time process running
+        running_process->tr = time; //set response time
 
-    ProcessNode* temp = head->next;
+    ProcessNode* temp = head;
 
     while (temp) {
-        temp->tw++;
+        if (temp != running_process) {
+            temp->tw++;
+        }
         temp = temp->next;
+    }
+}
+
+ProcessNode* Queue::getSJ() {
+    //**Handle if processes are equal
+    if (isEmpty()) {
+        return nullptr;
+    } else if (!head->next) { //if only one item in Queue
+        return head;
+    } else {
+
+        ProcessNode* shortest_job = head;
+        ProcessNode* temp = head;
+        
+        while (temp && temp->next) {
+            if (temp->next->burst_seq[temp->next->p_counter] < shortest_job->burst_seq[shortest_job->p_counter]) { //next job less than current shortest job
+                shortest_job = temp->next; //set shortest job
+            } else if (temp->next->burst_seq[temp->next->p_counter] < shortest_job->burst_seq[shortest_job->p_counter]) { //else the bursts equal
+                if (temp->next->pid ) {
+
+                } 
+            }
+            temp = temp->next; //traverse
+        }
+
+        return shortest_job;
     }
 }

@@ -7,6 +7,7 @@
 void contextSwitchReport(const Clock& p_timer, const Queue& ready, const Queue& io);
 void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_complete);
 void FCFS(Queue& ready, Queue& io);
+void SJF(Queue& ready, Queue& io);
 
 int main() {
 
@@ -25,9 +26,13 @@ int main() {
 
     ready.create(p_data);
 
-    FCFS(ready, io);
-    //SJF(ready, io);
-
+    //FCFS(ready, io);
+    SJF(ready, io);
+//   std::cout << ready.getSJ()->pid << std::endl;
+//     ready.remove(4);
+//     std::cout << ready.getSJ()->pid << std::endl;
+//     ready.remove(2);
+//     std::cout << ready.getSJ()->pid << std::endl;  
     return 0;
 }
 
@@ -83,7 +88,7 @@ void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_com
     // Print the table header
     std::cout << std::setw(columnWidth) << std::left << "Process"
                 << std::setw(columnWidth) << std::left << "Tw"
-                << std::setw(columnWidth) << std::left << "Ttw" 
+                << std::setw(columnWidth) << std::left << "Ttr" 
                 << std::setw(columnWidth) << std::left << "Tr" << std::endl;
 
     std::cout << "---------------------------------" << std::endl;
@@ -141,8 +146,8 @@ void FCFS(Queue& ready, Queue& io) {
 
             if (running_process->burst_seq[(running_process->p_counter)]) { //if process burst currently running ** != 0 **
                 
-                ready.updateTimes(p_clock.time);
-                
+                ready.updateTimes(p_clock.time, running_process);
+
                 running_process->running_state = true; //update running state boolean
                 
                 //std::cout << "Process " << running_process->pid << " running " << std::endl << "Burst " << running_process->p_counter+1 << ": " << running_process->burst_seq[(running_process->p_counter)] << " time units left" << std::endl << std::endl;
@@ -162,7 +167,7 @@ void FCFS(Queue& ready, Queue& io) {
                     running_process->ttr = p_clock.time; //update turnaround time
                     
 
-                    //sstd::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr: " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
+                    //sstd::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr= " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
                     
                     process_complete.push_back(*running_process);
                     ready.dequeue(); ///remove from ready queue completely
@@ -208,5 +213,106 @@ void FCFS(Queue& ready, Queue& io) {
     cpu_util = static_cast<float>(total_cpu_time)/static_cast<float>(p_clock.time); //calculate cpu utilazation
 
     std::cout << std::endl << std::setw(25) << std::setfill(' ') << "FCFS CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
+    schedulerReport(p_clock, process_complete);
+}
+
+void SJF(Queue& ready, Queue& io) {
+    Clock p_clock;
+
+    float cpu_util;
+
+    std::vector<ProcessNode> process_complete;
+
+    ProcessNode* running_process = ready.getSJ();
+    ProcessNode* io_process  = nullptr;
+
+    unsigned int total_cpu_time = 0;
+  
+    while(!ready.isEmpty() || !io.isEmpty()) { //while either queue running operations
+        
+        std::cout << "Current execution time: " << p_clock.time << " Time Units" << std::endl;
+        p_clock.paused = true; //reset time
+
+
+        if(ready.isEmpty() && !io.isEmpty()) { //if ready empty but io not
+            //std::cout << "Ready Queue empty, All remaining processes in I/O" << std::endl; 
+            p_clock.time++;
+            p_clock.paused = false;
+        }
+        
+        if(!ready.isEmpty()) {
+            
+            if(running_process == nullptr) { //if ready was empty and now not empty anymore
+                running_process = ready.getSJ();
+            }
+
+            if (running_process->burst_seq[(running_process->p_counter)]) { //if process burst currently running ** != 0 **
+                
+                ready.updateTimes(p_clock.time, running_process);
+
+                running_process->running_state = true; //update running state boolean
+
+                std::cout << "Process " << running_process->pid << " running " << std::endl << "Burst " << running_process->p_counter+1 << ": " << running_process->burst_seq[(running_process->p_counter)] << " time units left" << std::endl << std::endl;
+
+                p_clock.time++; //increment timer
+                total_cpu_time++;
+                p_clock.paused = false; //let I/O know time was changed
+                running_process->burst_seq[(running_process->p_counter)]--; //decrement sequence burst
+
+            } else { //process finish with current cpu burst **time paused, IO will not do anything**
+
+                std::cout << "--------------------------------" << std::endl << "Process " << running_process->pid << " Burst #" << running_process->p_counter+1 << " Complete" << std::endl << std::endl;
+
+                if (running_process->p_counter == running_process->burst_seq.size()-1) { //if that was final cpu burst
+                    std::cout << "Process " << running_process->pid <<" Complete" << std::endl;
+                    
+                    running_process->ttr = p_clock.time; //update turnaround time
+                    
+                    std::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr= " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
+                    
+                    process_complete.push_back(*running_process);
+                    ready.remove(running_process->pid); ///remove from ready queue completely **returns next node, might have to overload**
+                    running_process = ready.getSJ(); //context switch after process complete
+                
+                } else { //just normal cpu burst
+
+                    running_process->p_counter++; //move to next burst in process
+                    running_process->running_state = false;
+                    io.enqueue(*running_process); //move head to io queue
+                    ready.remove(running_process->pid); //remove from ready queue
+                    if(ready.head != nullptr) {
+                        running_process = ready.getSJ(); //context swtich to next process in ready
+                        //contextSwitchReport(p_clock, ready, io);
+                    } else {
+                        running_process = nullptr;
+                        continue;
+                    } 
+                }
+            }
+        }
+
+        //handle io if time unit moved
+        if(!io.isEmpty() && !p_clock.paused) { //time changed and io queue no empty
+            io_process = io.head; //set up travesal
+            
+            while(io_process) { //while still process left
+                io_process->burst_seq[io_process->p_counter]--; //decrement burst
+
+                if(io_process->burst_seq[io_process->p_counter] == 0) { //finished I/O
+                    std::cout << "Process " << io_process->pid << " complete I/O #" << io_process->p_counter << " at time: " << p_clock.time << std::endl;
+
+                    io_process->p_counter++; //move to next CPU burst
+                    ready.enqueue(*io_process); //move copy to ready
+                    io_process = io.remove(io_process->pid); //remove from I/O and get next process in queue
+                } else {
+                    io_process = io_process->next;
+                }
+            }
+            io_process = io.head;
+        }
+    }
+    cpu_util = static_cast<float>(total_cpu_time)/static_cast<float>(p_clock.time); //calculate cpu utilazation
+
+    std::cout << std::endl << std::setw(25) << std::setfill(' ') << "SJF CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
     schedulerReport(p_clock, process_complete);
 }
