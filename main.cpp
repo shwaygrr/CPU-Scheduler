@@ -4,7 +4,7 @@
 
 #include "structs.h"
 
-void contextSwitchReport(const Clock& p_timer, const Queue& ready, const Queue& io);
+void contextSwitchReport(const Clock& p_timer, const Queue& ready, const Queue& io, const ProcessNode* running_process);
 void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_complete);
 void FCFS(Queue& ready, Queue& io);
 void SJF(Queue& ready, Queue& io);
@@ -37,7 +37,7 @@ int main() {
 }
 
 //report functions
-void contextSwitchReport(const Clock& p_clock, const Queue& ready, const Queue& io) {
+void contextSwitchReport(const Clock& p_clock, const Queue& ready, const Queue& io, const ProcessNode* running_process) {
     /*
         (5) Sample of dynamic execution (program output)
             **This information should be displayed for each context switch**
@@ -51,7 +51,7 @@ void contextSwitchReport(const Clock& p_clock, const Queue& ready, const Queue& 
     std::cout << "--------------------------------" << std::endl << "***Context Switch Report***" << std::endl << std::endl;
 
     std::cout << "Current Execution time: " << p_clock.time << std::endl;
-    std::cout << "Running Process: " << ready.head->pid << std::endl;
+    std::cout << "Running Process: " << running_process->pid << std::endl;
     std::cout << std::endl << "Processes in Ready: " << std::endl;
     ready.display(); //process in ready
     std::cout << std::endl << "Processes in I/O: " << std::endl;
@@ -111,6 +111,7 @@ void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_com
     std::cout << "Total Time to Complete: " << p_clock.time;
 }
 
+/***SJF and FCFS very similiar, will try to make them seperate functions if no issues arise with SJF*/
 
 void FCFS(Queue& ready, Queue& io) {
     Clock p_clock;
@@ -122,7 +123,7 @@ void FCFS(Queue& ready, Queue& io) {
     ProcessNode* running_process = ready.head;
     ProcessNode* io_process  = io.head;
 
-    unsigned int total_cpu_time = 0;
+    unsigned int total_cpu_time = 0, idle_time;
   
     while(!ready.isEmpty() || !io.isEmpty()) { //while either queue running operations
         
@@ -133,8 +134,9 @@ void FCFS(Queue& ready, Queue& io) {
 
 
         if(ready.isEmpty() && !io.isEmpty()) { //if ready empty but io not
-            //std::cout << "Ready Queue empty, All remaining processes in I/O" << std::endl; 
+            std::cout << "CPU idle, All processes in I/O" << std::endl; 
             p_clock.time++;
+            idle_time++;
             p_clock.paused = false;
         }
         
@@ -181,7 +183,7 @@ void FCFS(Queue& ready, Queue& io) {
                     ready.dequeue(); //remove from ready queue
                     if(ready.head != nullptr) {
                         running_process = ready.head; //context swtich to next process in ready
-                        contextSwitchReport(p_clock, ready, io);
+                        contextSwitchReport(p_clock, ready, io, running_process);
                     } else {
                         running_process = nullptr;
                         continue;
@@ -226,17 +228,18 @@ void SJF(Queue& ready, Queue& io) {
     ProcessNode* running_process = ready.getSJ();
     ProcessNode* io_process  = nullptr;
 
-    unsigned int total_cpu_time = 0;
-  
+    unsigned int total_cpu_time = 0, idle_time = 0;
+
     while(!ready.isEmpty() || !io.isEmpty()) { //while either queue running operations
         
-        std::cout << "Current execution time: " << p_clock.time << " Time Units" << std::endl;
+        //std::cout << "Current execution time: " << p_clock.time << " Time Units" << std::endl;
         p_clock.paused = true; //reset time
 
 
         if(ready.isEmpty() && !io.isEmpty()) { //if ready empty but io not
-            //std::cout << "Ready Queue empty, All remaining processes in I/O" << std::endl; 
+            std::cout << "CPU idle - all processes in I/O" << std::endl; 
             p_clock.time++;
+            idle_time++;
             p_clock.paused = false;
         }
         
@@ -252,7 +255,7 @@ void SJF(Queue& ready, Queue& io) {
 
                 running_process->running_state = true; //update running state boolean
 
-                std::cout << "Process " << running_process->pid << " running " << std::endl << "Burst " << running_process->p_counter+1 << ": " << running_process->burst_seq[(running_process->p_counter)] << " time units left" << std::endl << std::endl;
+                //std::cout << "Process " << running_process->pid << " running " << std::endl << "Burst " << running_process->p_counter+1 << ": " << running_process->burst_seq[(running_process->p_counter)] << " time units left" << std::endl << std::endl;
 
                 p_clock.time++; //increment timer
                 total_cpu_time++;
@@ -268,7 +271,7 @@ void SJF(Queue& ready, Queue& io) {
                     
                     running_process->ttr = p_clock.time; //update turnaround time
                     
-                    std::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr= " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
+                    //std::cout << "tw= " << running_process->tw << std::endl << "tr= " << running_process->tr << std::endl << "ttr= " << running_process->ttr << std::endl << "--------------------------------" << std::endl;
                     
                     process_complete.push_back(*running_process);
                     ready.remove(running_process->pid); ///remove from ready queue completely **returns next node, might have to overload**
@@ -282,7 +285,7 @@ void SJF(Queue& ready, Queue& io) {
                     ready.remove(running_process->pid); //remove from ready queue
                     if(ready.head != nullptr) {
                         running_process = ready.getSJ(); //context swtich to next process in ready
-                        //contextSwitchReport(p_clock, ready, io);
+                        contextSwitchReport(p_clock, ready, io, running_process);
                     } else {
                         running_process = nullptr;
                         continue;
