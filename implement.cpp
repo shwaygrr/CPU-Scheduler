@@ -1,5 +1,5 @@
 
-#include "structs.h"
+#include "src.h"
  
  //constructors
 ProcessNode::ProcessNode() {
@@ -203,4 +203,25 @@ ProcessNode* Queue::getSJ() {
 
         return shortest_job;
     }
+}
+
+//handle I/O
+
+void handleIO(Queue& io, Queue& ready, ProcessNode* io_process, Clock& p_clock) {
+    io_process = io.head; //set up travesal
+
+    while(io_process) { //while still process left
+        io_process->burst_seq[io_process->p_counter]--; //decrement burst
+
+        if(io_process->burst_seq[io_process->p_counter] == 0) { //finished I/O
+            std::cout << "Process " << io_process->pid << " complete I/O #" << io_process->p_counter << " at time: " << p_clock.time << std::endl;
+
+            io_process->p_counter++; //move to next CPU burst
+            ready.enqueue(*io_process); //move copy to ready
+            io_process = io.remove(io_process->pid); //remove from I/O and get next process in queue
+        } else {
+            io_process = io_process->next;
+        }
+    }
+    io_process = io.head;
 }

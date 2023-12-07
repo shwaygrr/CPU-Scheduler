@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 
-#ifndef STRUCTS_H
-#define STRUCTS_H
+#ifndef SRC_H
+#define SRC_H
 
 //Proccess Control Block double linked list implementation
 
@@ -66,5 +66,13 @@ class Queue {
         
         void assignPid(ProcessNode* process); //assign process ID based on counter
 };
+
+void handleIO(Queue& io, Queue& ready, ProcessNode* io_process, Clock& p_clock);
+
+void contextSwitchReport(const Clock& p_timer, const Queue& ready, const Queue& io, const ProcessNode* running_process);
+void schedulerReport(const Clock& p_clock, std::vector<ProcessNode>& process_complete);
+void FCFS(Queue& ready, Queue& io);
+void SJF(Queue& ready, Queue& io);
+int mRR(Queue& ready, Queue& io, unsigned int tq);
 
 #endif
