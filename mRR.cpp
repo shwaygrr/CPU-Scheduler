@@ -118,7 +118,7 @@ int mRR(Queue& ready, Queue& io, unsigned int tq) {
     }
     cpu_util = static_cast<float>(total_cpu_time)/static_cast<float>(p_clock.time); //calculate cpu utilazation
 
-    std::cout << std::endl << std::setw(25) << std::setfill(' ') << "Round Robin (" << tq << ") CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
+    std::cout << std::endl << std::setw(5) << std::setfill(' ') << "RR (" << tq << ") CPU Utilization: " << std::fixed << std::setprecision(2) << cpu_util*100 << "%" << std::endl; 
     schedulerReport(p_clock, process_complete);
     return total_cpu_time;
 }
